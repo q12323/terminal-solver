@@ -16,7 +16,7 @@
 	"environment": "client",
 	"entrypoints": {
 		"main": [
-			"sapv.terminalsolver.Terminalsolver"
+			"sapv.terminalsolver.TerminalSolverMod"
 		]
 	},
 	"mixins": [
