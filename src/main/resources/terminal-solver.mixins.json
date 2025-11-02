@@ -1,17 +1,17 @@
 {
-	"required": true,
-	"package": "sapv.terminalsolver.mixin",
-	"compatibilityLevel": "JAVA_21",
-	"client": [
-		"ClientCommonNetworkHandlerMixin",
-		"HandledScreenAccessor",
-		"NetworkThreadUtilsMixin",
-		"ScreenMixin"
-	],
-	"injectors": {
-		"defaultRequire": 1
-	},
-	"overwrites": {
-		"requireAnnotations": true
+  "required": true,
+  "package": "sapv.terminalsolver.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "ClientCommonNetworkHandlerMixin",
+    "HandledScreenAccessor",
+    "NetworkThreadUtilsMixin",
+    "ScreenMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "overwrites": {
+    "requireAnnotations": true
 	}
 }

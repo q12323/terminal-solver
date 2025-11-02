@@ -6,7 +6,7 @@ import sapv.terminalsolver.terminal.impl.ColorsSolver;
 
 import java.util.Set;
 
-public class MagentaSolver extends ColorsSolver {
+public class MagentaColorsSolver extends ColorsSolver {
     private static final Set<Item> items = Set.of(
             Items.MAGENTA_WOOL,
             Items.MAGENTA_DYE,

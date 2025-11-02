@@ -1,0 +1,20 @@
+package sapv.terminalsolver.terminal.impl;
+
+import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
+import net.minecraft.screen.slot.Slot;
+import sapv.terminalsolver.terminal.Click;
+import sapv.terminalsolver.terminal.Renderer;
+
+public class SimpleRenderer implements Renderer {
+    public static final SimpleRenderer INSTANCE = new SimpleRenderer();
+    @Override
+    public void render(Click[] solution, DrawContext context, Screen screen, float deltaTicks) {
+        if (!(screen instanceof GenericContainerScreen container)) return;
+        for (Click click : solution) {
+            Slot slot = container.getScreenHandler().getSlot(click.slot());
+            drawSlotBox(context, screen, slot, 0xFF0000FF);
+        }
+    }
+}

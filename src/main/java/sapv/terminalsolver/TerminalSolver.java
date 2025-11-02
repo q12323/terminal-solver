@@ -1,12 +1,9 @@
 package sapv.terminalsolver;
 
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.c2s.play.CloseHandledScreenC2SPacket;
@@ -14,7 +11,6 @@ import net.minecraft.network.packet.s2c.play.CloseScreenS2CPacket;
 import net.minecraft.network.packet.s2c.play.InventoryS2CPacket;
 import net.minecraft.network.packet.s2c.play.OpenScreenS2CPacket;
 import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket;
-import net.minecraft.screen.GenericContainerScreenHandler;
 import net.minecraft.screen.ScreenHandlerType;
 import sapv.terminalsolver.terminal.Click;
 import sapv.terminalsolver.terminal.TerminalType;
@@ -53,8 +49,7 @@ public class TerminalSolver {
         if (!toggled) return;
         if (mc.player == null || mc.world == null) return;
         if (currentTerminalState == null) return;
-        cachedSolution = currentTerminalState.getSolution();
-//        TerminalSolverMod.LOGGER.info("solutionlength: {}", cachedSolution.length);
+//        cachedSolution = currentTerminalState.getSolutions();
     }
 
     public void onPostScreenRender(DrawContext context, Screen screen, float deltaTicks) {
@@ -100,11 +95,12 @@ public class TerminalSolver {
         if (currentTerminalState.syncId() != packet.syncId()) return;
         try {
             for (int i = 0; i < packet.contents().size(); i++) {
-                currentTerminalState.stacks()[i] =  packet.contents().get(i);
+                currentTerminalState.stacks()[i] = packet.contents().get(i);
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
+        cachedSolution = currentTerminalState.getSolutions();
     }
 
     private void onSlotUpdate(ScreenHandlerSlotUpdateS2CPacket packet) {
@@ -116,6 +112,7 @@ public class TerminalSolver {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        cachedSolution = currentTerminalState.getSolutions();
     }
 
     private static final Map<ScreenHandlerType<?>, Integer> slotSizeMap = Map.of(
