@@ -1,6 +1,7 @@
 package sapv.terminalsolver;
 
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientWorldEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
@@ -12,6 +13,7 @@ import net.minecraft.network.packet.s2c.play.InventoryS2CPacket;
 import net.minecraft.network.packet.s2c.play.OpenScreenS2CPacket;
 import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket;
 import net.minecraft.screen.ScreenHandlerType;
+import org.jetbrains.annotations.NotNull;
 import sapv.terminalsolver.terminal.Click;
 import sapv.terminalsolver.terminal.TerminalType;
 import sapv.terminalsolver.terminal.TerminalState;
@@ -24,13 +26,15 @@ public class TerminalSolver {
     private static final MinecraftClient mc = MinecraftClient.getInstance();
     public static void init() {
         ClientTickEvents.END_CLIENT_TICK.register(INSTANCE::onEndTick);
+        ClientWorldEvents.AFTER_CLIENT_WORLD_CHANGE.register((client, world) -> INSTANCE.reset());
     }
     private TerminalSolver() {}
 
     private boolean toggled = true;
 
     private TerminalState currentTerminalState;
-    private Click[] cachedSolution;
+    @NotNull
+    private Click[] cachedSolution = Click.EMPTY_SOLUTION;
 
     public void setToggled(boolean toggled) {
         this.toggled = toggled;
@@ -43,6 +47,7 @@ public class TerminalSolver {
 
     private void reset() {
         currentTerminalState = null;
+        cachedSolution = Click.EMPTY_SOLUTION;
     }
 
     private void onEndTick(MinecraftClient mc) {
@@ -55,7 +60,6 @@ public class TerminalSolver {
     public void onPostScreenRender(DrawContext context, Screen screen, float deltaTicks) {
         if (!toggled) return;
         if (currentTerminalState == null) return;
-        if (cachedSolution == null) return;
         currentTerminalState.type().renderer.render(cachedSolution, context, screen, deltaTicks);
     }
 
