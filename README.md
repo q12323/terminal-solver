@@ -1,2 +1,2 @@
 ### Terminal Solver.
-We don't solve terminal.
+We do solve terminal.
