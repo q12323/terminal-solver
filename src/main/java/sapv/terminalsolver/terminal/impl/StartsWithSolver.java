@@ -25,13 +25,13 @@ public class StartsWithSolver implements Solver {
 
     @Override
     public Click[] getSolutions(TerminalState state) {
-        if (state.stacks().length != SIZE) return Click.EMPTY_SOLUTION;
+        if (state.stacks().size() != SIZE) return Click.EMPTY_SOLUTION;
         String c = getStartsWithChar(state.title().getString());
         assert c != null;
 //        TerminalSolverMod.LOGGER.info("char {}", c);
         List<Click> solutions = new ArrayList<>();
         for (int slot : allowedSlots) {
-            ItemStack stack = state.stacks()[slot];
+            ItemStack stack = state.stacks().get(slot);
             if (stack.hasGlint()) continue;
             if (!stack.getName().getString().toLowerCase().startsWith(c)) continue;
             solutions.add(new Click(slot, 0, 1));

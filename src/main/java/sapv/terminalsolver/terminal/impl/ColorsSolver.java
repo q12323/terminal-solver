@@ -16,10 +16,10 @@ public abstract class ColorsSolver implements Solver {
 
     @Override
     public Click[] getSolutions(TerminalState state) {
-        if (state.stacks().length != SIZE) return Click.EMPTY_SOLUTION;
+        if (state.stacks().size() != SIZE) return Click.EMPTY_SOLUTION;
         List<Click> solutions = new ArrayList<>();
         for (int slot : allowedSlots) {
-            ItemStack stack = state.stacks()[slot];
+            ItemStack stack = state.stacks().get(slot);
             if (!isCorrectItem(stack.getItem())) continue;
             if (stack.hasGlint()) continue;
             solutions.add(new Click(slot, 0, 1));

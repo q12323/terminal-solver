@@ -14,14 +14,14 @@ public class NumbersSolver implements Solver {
 
     @Override
     public Click[] getSolutions(TerminalState state) {
-        if (state.stacks().length != SIZE) throw new IllegalArgumentException();
+        if (state.stacks().size() != SIZE) throw new IllegalArgumentException();
         List<Click> solution = new ArrayList<>();
         for (int slot : allowedSlots) {
-            ItemStack stack = state.stacks()[slot];
+            ItemStack stack = state.stacks().get(slot);
             if (!isRedGlassPane(stack)) continue;
             solution.add(new Click(slot, 0, 1));
         }
-        solution.sort(Comparator.comparingInt(click -> state.stacks()[click.slot()].getCount()));
+        solution.sort(Comparator.comparingInt(click -> state.stacks().get(click.slot()).getCount()));
         return solution.toArray(Click.EMPTY_SOLUTION);
     }
 

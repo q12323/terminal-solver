@@ -21,26 +21,6 @@ public class TerminalSolverMod implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
-		// global end tick -> check terminal -> get solution
-		// 틱마다? 랜더틱마다?
-		// 터미널 랜더링
-		// 터미널 창 이름 보고 매치 시키는거
-		// 솔루션의 공통된 그런거 Solution{ slot, button,  }
-		// post screen render mixin
-
-		/*
-		* 틱 베이스
-		* 간단함, 클릭한거 보정 해야됨
-		* */
-
-		// 패킷 베이스
-		// 복잡함, 클릭한거 보정 필요 없음
-
 		TerminalSolver.init();
-
-		test();
-	}
-
-	private static void test() {
 	}
 }

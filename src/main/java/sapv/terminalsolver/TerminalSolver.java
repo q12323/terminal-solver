@@ -5,6 +5,7 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientWorldEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.c2s.play.CloseHandledScreenC2SPacket;
@@ -13,6 +14,7 @@ import net.minecraft.network.packet.s2c.play.InventoryS2CPacket;
 import net.minecraft.network.packet.s2c.play.OpenScreenS2CPacket;
 import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket;
 import net.minecraft.screen.ScreenHandlerType;
+import net.minecraft.util.collection.DefaultedList;
 import org.jetbrains.annotations.NotNull;
 import sapv.terminalsolver.terminal.Click;
 import sapv.terminalsolver.terminal.TerminalType;
@@ -25,7 +27,6 @@ public class TerminalSolver {
     public static final TerminalSolver INSTANCE = new TerminalSolver();
     private static final MinecraftClient mc = MinecraftClient.getInstance();
     public static void init() {
-        ClientTickEvents.END_CLIENT_TICK.register(INSTANCE::onEndTick);
         ClientWorldEvents.AFTER_CLIENT_WORLD_CHANGE.register((client, world) -> INSTANCE.reset());
     }
     private TerminalSolver() {}
@@ -48,13 +49,6 @@ public class TerminalSolver {
     private void reset() {
         currentTerminalState = null;
         cachedSolution = Click.EMPTY_SOLUTION;
-    }
-
-    private void onEndTick(MinecraftClient mc) {
-        if (!toggled) return;
-        if (mc.player == null || mc.world == null) return;
-        if (currentTerminalState == null) return;
-//        cachedSolution = currentTerminalState.getSolutions();
     }
 
     public void onPostScreenRender(DrawContext context, Screen screen, float deltaTicks) {
@@ -83,36 +77,35 @@ public class TerminalSolver {
     private void onOpenScreenPacket(OpenScreenS2CPacket packet) {
         currentTerminalState = null;
         if (!toggled) return;
-        TerminalSolverMod.LOGGER.info("open {} {}", packet.getName().getString(), packet.getScreenHandlerType());
+//        TerminalSolverMod.LOGGER.info("open {} {}", packet.getName().getString(), packet.getScreenHandlerType());
         int size = getSlotSize(packet.getScreenHandlerType());
         if (size == 0) return;
         TerminalType type = TerminalType.get(packet.getName().getString(), size);
         if (type == null) return;
-        ItemStack[] stacks = new ItemStack[size];
-        Arrays.fill(stacks, ItemStack.EMPTY);
+        DefaultedList<ItemStack> stacks = DefaultedList.ofSize(size, ItemStack.EMPTY);
         currentTerminalState = new TerminalState(type, packet.getName(), packet.getSyncId(), stacks);
     }
 
-    private void onInventoryPacket(InventoryS2CPacket packet) {
-        if (!toggled) return;
-        if (currentTerminalState == null) return;
-        if (currentTerminalState.syncId() != packet.syncId()) return;
-        try {
-            for (int i = 0; i < packet.contents().size(); i++) {
-                currentTerminalState.stacks()[i] = packet.contents().get(i);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        cachedSolution = currentTerminalState.getSolutions();
-    }
+//    private void onInventoryPacket(InventoryS2CPacket packet) {
+//        if (!toggled) return;
+//        if (currentTerminalState == null) return;
+//        if (currentTerminalState.syncId() != packet.syncId()) return;
+//        try {
+//            for (int i = 0; i < packet.contents().size(); i++) {
+//                currentTerminalState.stacks().set(i, packet.contents().get(i));
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//        cachedSolution = currentTerminalState.getSolutions();
+//    }
 
     private void onSlotUpdate(ScreenHandlerSlotUpdateS2CPacket packet) {
         if (!toggled) return;
         if (currentTerminalState == null) return;
         if (currentTerminalState.syncId() != packet.getSyncId()) return;
         try {
-            currentTerminalState.stacks()[packet.getSlot()] = packet.getStack();
+            currentTerminalState.stacks().set(packet.getSlot(), packet.getStack());
         } catch (Exception e) {
             e.printStackTrace();
         }

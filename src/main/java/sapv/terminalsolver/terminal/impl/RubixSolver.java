@@ -26,13 +26,13 @@ public class RubixSolver implements Solver {
 
     @Override
     public Click[] getSolutions(TerminalState state) {
-        if (state.stacks().length != SIZE) return Click.EMPTY_SOLUTION;
+        if (state.stacks().size() != SIZE) return Click.EMPTY_SOLUTION;
         List<Click[]> solutionsList = new ArrayList<>(orderMap.size());
 
         orderMap.keySet().forEach(to -> {
             List<Click> solutions = new ArrayList<>();
             for (int slot : allowedSlots) {
-                Item item = state.stacks()[slot].getItem();
+                Item item = state.stacks().get(slot).getItem();
                 if (!orderMap.containsKey(item)) return;
                 int offset = getClickOffset(item, to);
                 if (offset == 0) continue;

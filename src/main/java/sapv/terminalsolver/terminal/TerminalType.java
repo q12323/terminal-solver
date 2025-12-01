@@ -45,7 +45,7 @@ public enum TerminalType {
     }
 
     @FunctionalInterface
-    public interface TerminalValidator {
+    private interface TerminalValidator {
         boolean validate(String title, int size);
     }
 }
