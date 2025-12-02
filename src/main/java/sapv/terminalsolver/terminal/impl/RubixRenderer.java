@@ -15,8 +15,7 @@ public class RubixRenderer implements Renderer {
         context.getMatrices().translate(0f, 0f, 1000f);
         for (Click click : solution) {
             Slot slot = container.getScreenHandler().getSlot(click.slot());
-//            drawSlotBox(context, screen, slot, 0xFF0000FF);
-            drawSlotString(String.valueOf(click.button() == 0 ? click.times() : -click.times()), context, screen, slot, 0xFFFFFF);
+            drawSlotString(String.valueOf(click.button() == 0 ? click.times() : -click.times()), context, screen, slot, 0xFFFFFFFF);
         }
         context.getMatrices().pop();
     }

@@ -22,7 +22,9 @@ public enum TerminalType {
     RED_COLORS(SimpleRenderer.INSTANCE, new RedColorsSolver(), (title, size) -> size == ColorsSolver.SIZE && "Select all the RED items!".equals(title)),
     BLACK_COLORS(SimpleRenderer.INSTANCE, new BlackColorsSolver(), (title, size) -> size == ColorsSolver.SIZE && "Select all the BLACK items!".equals(title)),
     RUBIX(new RubixRenderer(), new RubixSolver(), (title, size) -> size == RubixSolver.SIZE && "Change all to same color!".equals(title)),
-    STARTS_WITH(SimpleRenderer.INSTANCE, new StartsWithSolver(), ((title, size) -> size == StartsWithSolver.SIZE && StartsWithSolver.getStartsWithChar(title) != null))
+    STARTS_WITH(SimpleRenderer.INSTANCE, new StartsWithSolver(), (title, size) -> size == StartsWithSolver.SIZE && StartsWithSolver.getStartsWithChar(title) != null),
+    RED_GREEN(new RedGreenRenderer(), new RedGreenSolver(), (title, size) -> size == RedGreenSolver.SIZE && "Correct all the panes!".equals(title)),
+    MELODY(SimpleRenderer.INSTANCE, state -> Click.EMPTY_SOLUTION, (title, size) -> size == 54 && "Click the button on time!".equals(title)),
     ;
 
     public final Renderer renderer;

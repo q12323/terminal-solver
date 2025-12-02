@@ -1,10 +1,7 @@
 package sapv.terminalsolver.mixin;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.text.Text;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -14,6 +11,7 @@ import sapv.terminalsolver.TerminalSolverMod;
 
 @Mixin(Screen.class)
 abstract class ScreenMixin {
+    @SuppressWarnings("ConstantConditions")
     @Inject(method = "renderWithTooltip", at = @At("RETURN"))
     public void render(DrawContext context, int mouseX, int mouseY, float deltaTicks, CallbackInfo ci) {
         try {
