@@ -4,7 +4,6 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
 import net.minecraft.screen.slot.Slot;
-import sapv.terminalsolver.mixin.HandledScreenAccessor;
 import sapv.terminalsolver.terminal.Click;
 import sapv.terminalsolver.terminal.Renderer;
 

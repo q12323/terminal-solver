@@ -7,7 +7,10 @@ import sapv.terminalsolver.terminal.Click;
 import sapv.terminalsolver.terminal.Solver;
 import sapv.terminalsolver.terminal.TerminalState;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class RubixSolver implements Solver {
     public static final int SIZE = 45;

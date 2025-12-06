@@ -6,7 +6,10 @@ import sapv.terminalsolver.terminal.Click;
 import sapv.terminalsolver.terminal.Solver;
 import sapv.terminalsolver.terminal.TerminalState;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Set;
 
 public class NumbersSolver implements Solver {
     private static final Set<Integer> allowedSlots = Set.of(10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 23, 24, 25);

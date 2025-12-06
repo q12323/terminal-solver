@@ -5,16 +5,19 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.Packet;
+import net.minecraft.network.packet.c2s.play.ClickSlotC2SPacket;
 import net.minecraft.network.packet.c2s.play.CloseHandledScreenC2SPacket;
 import net.minecraft.network.packet.s2c.play.CloseScreenS2CPacket;
 import net.minecraft.network.packet.s2c.play.OpenScreenS2CPacket;
 import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket;
 import net.minecraft.screen.ScreenHandlerType;
+import net.minecraft.text.Text;
 import net.minecraft.util.collection.DefaultedList;
 import org.jetbrains.annotations.NotNull;
 import sapv.terminalsolver.terminal.Click;
-import sapv.terminalsolver.terminal.TerminalType;
+import sapv.terminalsolver.terminal.ClickHistoryTerminalState;
 import sapv.terminalsolver.terminal.TerminalState;
+import sapv.terminalsolver.terminal.TerminalType;
 
 import java.util.Map;
 
@@ -32,6 +35,8 @@ public class TerminalSolver {
     private Click[] cachedSolution = Click.EMPTY_SOLUTION;
     private boolean updateSolution;
 
+    private int lastClickSyncId = -10;
+
     public void setToggled(boolean toggled) {
         this.toggled = toggled;
         reset();
@@ -44,6 +49,7 @@ public class TerminalSolver {
     private void reset() {
         currentTerminalState = null;
         cachedSolution = Click.EMPTY_SOLUTION;
+        lastClickSyncId = -10;
     }
 
     void onPostScreenRender(DrawContext context, Screen screen, float deltaTicks) {
@@ -53,8 +59,10 @@ public class TerminalSolver {
     }
 
     void onSendPacket(Packet<?> packet) {
-        if (packet instanceof CloseHandledScreenC2SPacket) {
-            currentTerminalState = null;
+        switch (packet) {
+            case ClickSlotC2SPacket p -> onClickSlotPacket(p);
+            case CloseHandledScreenC2SPacket p -> currentTerminalState = null;
+            default -> {}
         }
     }
 
@@ -76,7 +84,18 @@ public class TerminalSolver {
         }
     }
 
+    private void onClickSlotPacket(ClickSlotC2SPacket packet) {
+        if (currentTerminalState instanceof ClickHistoryTerminalState historyState) {
+            int syncId = packet.syncId();
+            if (lastClickSyncId != syncId && !historyState.hasClick(packet.slot())) {
+                lastClickSyncId = syncId;
+                historyState.addClick(packet.slot());
+            }
+        }
+    }
+
     private void onOpenScreenPacket(OpenScreenS2CPacket packet) {
+        TerminalState before = currentTerminalState;
         currentTerminalState = null;
         if (!toggled) return;
         int size = getSlotSize(packet.getScreenHandlerType());
@@ -84,8 +103,24 @@ public class TerminalSolver {
         TerminalType type = TerminalType.get(packet.getName().getString(), size);
         if (type == null) return;
         DefaultedList<ItemStack> stacks = DefaultedList.ofSize(size, ItemStack.EMPTY);
-        currentTerminalState = new TerminalState(type, packet.getName(), packet.getSyncId(), stacks);
+        Text title = packet.getName();
+        int syncId = packet.getSyncId();
+        if (before instanceof ClickHistoryTerminalState beforeHistoryState &&
+                beforeHistoryState.type() == TerminalType.STARTS_WITH &&
+                type == TerminalType.STARTS_WITH &&
+                beforeHistoryState.title().equals(title) &&
+                beforeHistoryState.syncId() % 100 + 1 == syncId
+        ) {
+            ClickHistoryTerminalState clickHistoryTerminalState = new ClickHistoryTerminalState(type, title, syncId, stacks);
+            beforeHistoryState.forEach(clickHistoryTerminalState::addClick);
+            currentTerminalState = clickHistoryTerminalState;
+        } else if (type == TerminalType.STARTS_WITH) {
+            currentTerminalState = new ClickHistoryTerminalState(type, title, syncId, stacks);
+        } else {
+            currentTerminalState = new TerminalState(type, title, syncId, stacks);
+        }
     }
+
 
     private void onSlotUpdate(ScreenHandlerSlotUpdateS2CPacket packet) {
         if (!toggled) return;

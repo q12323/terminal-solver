@@ -1,13 +1,13 @@
 package sapv.terminalsolver.terminal.impl;
 
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.collection.DefaultedList;
 import org.jetbrains.annotations.Nullable;
 import sapv.terminalsolver.terminal.Click;
+import sapv.terminalsolver.terminal.ClickHistoryTerminalState;
 import sapv.terminalsolver.terminal.Solver;
 import sapv.terminalsolver.terminal.TerminalState;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -29,13 +29,21 @@ public class StartsWithSolver implements Solver {
         if (state.stacks().size() != SIZE) return Click.EMPTY_SOLUTION;
         String c = getStartsWithChar(state.title().getString());
         assert c != null;
-        List<Click> solutions = new ArrayList<>();
-        for (int slot : allowedSlots) {
-            ItemStack stack = state.stacks().get(slot);
-            if (stack.hasGlint()) continue;
-            if (!stack.getName().getString().toLowerCase().startsWith(c)) continue;
-            solutions.add(new Click(slot, 0, 1));
+        DefaultedList<ItemStack> stacks = state.stacks();
+        if (state instanceof ClickHistoryTerminalState clickedSlotsState) {
+            return allowedSlots.stream()
+                    .filter(slot -> !clickedSlotsState.hasClick(slot))
+                    .filter(slot -> stacks.get(slot).getName().getString().toLowerCase().startsWith(c))
+                    .map(slot -> new Click(slot, 0, 1))
+                    .toArray(Click[]::new);
+        } else {
+            return allowedSlots.stream()
+                    .filter(slot -> {
+                        ItemStack stack = stacks.get(slot);
+                        return !stack.hasGlint() && stack.getName().getString().toLowerCase().startsWith(c);
+                    })
+                    .map(slot -> new Click(slot, 0, 1))
+                    .toArray(Click[]::new);
         }
-        return solutions.toArray(Click.EMPTY_SOLUTION);
     }
 }
