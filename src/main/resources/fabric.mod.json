@@ -15,7 +15,7 @@
 	"icon": "assets/terminal-solver/icon.png",
 	"environment": "client",
 	"entrypoints": {
-		"main": [
+		"client": [
 			"sapv.terminalsolver.TerminalSolverMod"
 		]
 	},

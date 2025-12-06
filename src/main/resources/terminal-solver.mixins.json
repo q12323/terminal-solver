@@ -5,6 +5,7 @@
   "client": [
     "ClientCommonNetworkHandlerMixin",
     "HandledScreenAccessor",
+    "MinecraftClientMixin",
     "NetworkThreadUtilsMixin",
     "ScreenMixin"
   ],

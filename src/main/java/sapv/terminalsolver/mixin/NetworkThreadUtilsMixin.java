@@ -7,8 +7,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import sapv.terminalsolver.TerminalSolver;
-import sapv.terminalsolver.TerminalSolverMod;
+import sapv.terminalsolver.Dispatcher;
 
 @Mixin(NetworkThreadUtils.class)
 public class NetworkThreadUtilsMixin {
@@ -17,11 +16,6 @@ public class NetworkThreadUtilsMixin {
             at = @At(value = "INVOKE", target = "Lnet/minecraft/network/packet/Packet;apply(Lnet/minecraft/network/listener/PacketListener;)V")
     )
     private static <T extends PacketListener> void method_11072(T packetListener, Packet<T> packet, CallbackInfo ci) {
-        try {
-            TerminalSolver.INSTANCE.onMainReceivePacket(packet);
-        } catch (Exception e) {
-            TerminalSolverMod.LOGGER.error("Exception in NetworkThreadUtilsMixin method_11072", e);
-            throw new RuntimeException(e);
-        }
+        Dispatcher.onMainReceivePacket(packet);
     }
 }

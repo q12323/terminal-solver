@@ -30,6 +30,7 @@ public class TerminalSolver {
     private TerminalState currentTerminalState;
     @NotNull
     private Click[] cachedSolution = Click.EMPTY_SOLUTION;
+    private boolean updateSolution;
 
     public void setToggled(boolean toggled) {
         this.toggled = toggled;
@@ -45,24 +46,33 @@ public class TerminalSolver {
         cachedSolution = Click.EMPTY_SOLUTION;
     }
 
-    public void onPostScreenRender(DrawContext context, Screen screen, float deltaTicks) {
+    void onPostScreenRender(DrawContext context, Screen screen, float deltaTicks) {
         if (!toggled) return;
         if (currentTerminalState == null) return;
         currentTerminalState.type().renderer.render(cachedSolution, context, screen, deltaTicks);
     }
 
-    public void onSendPacket(Packet<?> packet) {
+    void onSendPacket(Packet<?> packet) {
         if (packet instanceof CloseHandledScreenC2SPacket) {
             currentTerminalState = null;
         }
     }
 
-    public void onMainReceivePacket(Packet<?> packet) {
+    void onMainReceivePacket(Packet<?> packet) {
         switch (packet) {
             case OpenScreenS2CPacket p -> onOpenScreenPacket(p);
             case ScreenHandlerSlotUpdateS2CPacket p -> onSlotUpdate(p);
             case CloseScreenS2CPacket p -> currentTerminalState = null;
             default -> {}
+        }
+    }
+
+    void onPostRunTasks() {
+        if (updateSolution) {
+            updateSolution = false;
+            if (currentTerminalState != null) {
+                cachedSolution = currentTerminalState.getSolutions();
+            }
         }
     }
 
@@ -81,10 +91,11 @@ public class TerminalSolver {
         if (!toggled) return;
         if (currentTerminalState == null) return;
         if (currentTerminalState.syncId() != packet.getSyncId()) return;
-        try {
-            currentTerminalState.stacks().set(packet.getSlot(), packet.getStack());
-        } catch (Exception ignored) {}
-        cachedSolution = currentTerminalState.getSolutions();
+        int slot = packet.getSlot();
+        DefaultedList<ItemStack> stacks = currentTerminalState.stacks();
+        if (slot < 0 || slot >= stacks.size()) return;
+        stacks.set(packet.getSlot(), packet.getStack().copy());
+        updateSolution = true;
     }
 
     private static final Map<ScreenHandlerType<?>, Integer> slotSizeMap = Map.of(

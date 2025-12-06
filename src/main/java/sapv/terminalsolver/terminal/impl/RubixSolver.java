@@ -7,10 +7,7 @@ import sapv.terminalsolver.terminal.Click;
 import sapv.terminalsolver.terminal.Solver;
 import sapv.terminalsolver.terminal.TerminalState;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class RubixSolver implements Solver {
     public static final int SIZE = 45;
@@ -26,36 +23,33 @@ public class RubixSolver implements Solver {
 
     @Override
     public Click[] getSolutions(TerminalState state) {
-        if (state.stacks().size() != SIZE) return Click.EMPTY_SOLUTION;
-        List<Click[]> solutionsList = new ArrayList<>(orderMap.size());
-
-        orderMap.keySet().forEach(to -> {
-            List<Click> solutions = new ArrayList<>();
-            for (int slot : allowedSlots) {
-                Item item = state.stacks().get(slot).getItem();
-                if (!orderMap.containsKey(item)) return;
-                int offset = getClickOffset(item, to);
-                if (offset == 0) continue;
-                if (offset > 0) {
-                    solutions.add(new Click(slot, 0, offset));
-                } else {
-                    solutions.add(new Click(slot, 1, -offset));
-                }
-            }
-            solutionsList.add(solutions.toArray(Click.EMPTY_SOLUTION));
-        });
-
-        Click[] solutions = solutionsList.stream().reduce((min, cur) -> {
-            if (cur.length < min.length)  return cur;
-            return min;
-        }).orElse(Click.EMPTY_SOLUTION);
-
-        return solutions;
+        List<ItemStack> stacks = state.stacks();
+        if (stacks.size() != SIZE) return Click.EMPTY_SOLUTION;
+        return orderMap.values().stream().mapToInt(Integer::intValue)
+                .mapToObj(to -> allowedSlots.stream().mapToInt(Integer::intValue)
+                        .mapToObj(slot -> {
+                            int from = orderMap.getOrDefault(stacks.get(slot).getItem(), to);
+                            int offset = getClickOffset(from, to);
+                            if (offset > 0) {
+                                return new Click(slot, 0, offset);
+                            } else {
+                                return new Click(slot, 1, -offset);
+                            }
+                        })
+                        .filter(click -> click.times() != 0)
+                        .toList())
+                .min(Comparator.comparingInt(clicks -> clicks.stream()
+                        .mapToInt(Click::times)
+                        .sum()))
+                .map(solutions -> solutions.toArray(Click.EMPTY_SOLUTION))
+                .orElse(Click.EMPTY_SOLUTION);
     }
 
-    private static int getClickOffset(Item from, Item to) {
-        int fromIndex = orderMap.get(from);
-        int toIndex = orderMap.get(to);
-        return toIndex - fromIndex;
+    private static int getClickOffset(int from, int to) {
+        int offset = (to - from + 5) % 5;
+        if (offset > 2) {
+            offset = offset - 5;
+        }
+        return offset;
     }
 }
